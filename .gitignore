@@ -1,0 +1,6 @@
+*.pyc
+.pytest_cache/
+GeneLocator.egg-info
+build
+dist
+.eggs
