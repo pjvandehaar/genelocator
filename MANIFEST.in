@@ -1,1 +1,2 @@
 recursive-include genelocator gencode-*.json.gz
+recursive-include genelocator gencode-*.pickle
