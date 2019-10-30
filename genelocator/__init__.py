@@ -1,39 +1,26 @@
-import os
+import gzip
 import pickle
 
-from scripts.download import get_genes
+from genelocator.download import get_genes_iterator
 from .locate import GeneLocator
 
+from . import assets
+from .const import BUILD_LOOKUP
+from . import exception as gene_exc
 
-def get_genelocator(grch_build=38, gencode_version=32, only_codinglike_genetypes=True):
-    filename = _get_filename(grch_build, gencode_version, only_codinglike_genetypes)
-    filepath = os.path.join(os.path.dirname(__file__), filename)
-    if os.path.exists(filepath):
-        with open(filepath, 'rb') as f:
-            # We can save a pickled instance of the locator class for fast re-use later
-            return pickle.load(f)
+
+def get_genelocator(build_or_path: str, *, gencode_version=32, coding_only=True, auto_fetch=False):
+    if build_or_path in BUILD_LOOKUP:
+        # We are looking up a special, known dataset cached on disk
+        geneset = 'codinglike' if coding_only else 'all'  # TODO: Use enum here
+        # If auto_fetch is specified, this function will block until the data has been returned
+        # It would be really cool if we could use Peter's streaming dataset generation, but that saving wasn't
+        # implemented. I've simplified the current code t reflect only the features we are currently using, with an eye
+        # towards going that direction later.
+        source_path = assets.locate_by_metadata(build_or_path, gencode_version, geneset, auto_fetch=auto_fetch)
     else:
-        return GeneLocator(
-            get_genes(
-                grch_build=grch_build,
-                gencode_version=gencode_version,
-                only_codinglike_genetypes=only_codinglike_genetypes)
-        )
+        # The user has specified a path to a lookup file (premade tree in compressed pickle format). Use it!
+        source_path = build_or_path
 
-
-def _get_filename(grch_build=38, gencode_version=32, only_codinglike_genetypes=True):
-    return 'gencode-grch{}-gencode{}-{}.pickle'.format(
-        grch_build, gencode_version, 'codinglike' if only_codinglike_genetypes else 'all')
-
-
-def _save_file(grch_build=38, gencode_version=32, only_codinglike_genetypes=True):
-    """
-    Once the interval tree has been created, it is convenient to save it for future use.
-    cache get_genelocator() result into a file in this directory for quick use later
-    """
-    import pickle
-    gl = get_genelocator(grch_build, gencode_version, only_codinglike_genetypes)
-    filename = _get_filename(grch_build, gencode_version, only_codinglike_genetypes)
-    with open(filename, 'wb') as f:
-        # protocol=4 is faster and supported in python3.4+
-        pickle.dump(gl, f, protocol=4)
+    with gzip.open(source_path, 'rb') as f:
+        return pickle.load(f)
