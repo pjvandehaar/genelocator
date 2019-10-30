@@ -6,7 +6,7 @@ import typing as ty
 
 import intervaltree
 
-from . import exceptions as gene_exc
+from . import exception as gene_exc
 
 
 CHROM_PREFIX = re.compile('^chr')
@@ -21,7 +21,7 @@ def _chrom_helper(value: str) -> str:
 
 
 class GeneLocator:
-    def __init__(self, genes: ty.List[dict]):
+    def __init__(self, genes: ty.Iterable[dict]):
         """genes is like [{chrom: "1", start: 123, end: 234, ensg: "ENSG00345", symbol: "ACG4"},...]"""
         self._gene_info = {}
         self._its = {}  # an interval tree for each chromosome

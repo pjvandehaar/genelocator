@@ -1,16 +1,23 @@
 import pytest
 
-from genelocator import get_genelocator, exceptions as gene_exc
+from genelocator import get_genelocator
+from genelocator import assets
+from genelocator import exception as gene_exc
 from genelocator.locate import BisectFinder
 
 
 @pytest.fixture('module')
 def build38finder():
     # Mostly, tests are slow because of the time to build this tree. It's immutable, so only do this 1x per run
-    return get_genelocator(grch_build=38, gencode_version=32, only_codinglike_genetypes=True)
+    return get_genelocator('GRCh38', gencode_version=32, coding_only=True)
 
 
 class TestGeneLocator:
+    def test_creates_locator_from_filepath(self):
+        """This should work (measured by not raising an exception)"""
+        filepath = assets._get_cache_filepath('GRCh37', 32, 'codinglike')
+        get_genelocator(filepath)
+
     def test_finds_nearest_gene_when_none_overlap(self, build38finder):
         genes = build38finder.at('chr19', 1234)
         assert genes == [
@@ -44,8 +51,8 @@ class TestGeneLocator:
 
 class TestBisectFinder:
     """Validate that the bisect finder works as expected"""
-
     def test_scenarios(self):
+        # These scenarios are pulled directly from Pheweb's asserts
         finder = BisectFinder([(23, 'foo'), (25, 'bar')])
 
         assert finder.get_item_before_or_at(22) is None, 'There is nothing before the beginning'
