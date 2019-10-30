@@ -1,7 +1,7 @@
 import os
 import pickle
 
-from .download import get_genes
+from scripts.download import get_genes
 from .locate import GeneLocator
 
 
