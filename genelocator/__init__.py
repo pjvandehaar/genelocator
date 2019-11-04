@@ -1,12 +1,12 @@
 import gzip
 import pickle
 
-from genelocator.download import get_genes_iterator
-from .locate import GeneLocator
+from genelocator.download import get_genes_iterator  # noqa: F401
+from .locate import GeneLocator  # noqa: F401
 
 from . import assets
 from .const import BUILD_LOOKUP
-from . import exception as gene_exc
+from . import exception as gene_exc  # noqa: F401
 
 
 def get_genelocator(build_or_path: str, *, gencode_version=32, coding_only=True, auto_fetch=False):
