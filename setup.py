@@ -2,6 +2,7 @@
 # to install: `pip install -e .`
 # to install latest from pypi: `pip3 install -U --upgrade-strategy=eager --no-cache-dir genelocator`
 # to upload to pypi: `./setup.py publish`
+# to update dependencies: `pip3 install kpa && kpa pip-find-updates`, edit, `pip3 install -U --upgrade-strategy=eager genelocator`, test
 
 from setuptools import setup
 from pathlib import Path
