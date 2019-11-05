@@ -34,9 +34,9 @@ CODINGLIKE_GENETYPES = {
 def _download_gencode_gtf_gz_bytes(grch_build, gencode_version):
     """Download the file, hold it in memory, and return it as bytes"""
     if grch_build == 37:
-        template = 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{gencode_version}/GRCh37_mapping/gencode.v{gencode_version}lift37.annotation.gtf.gz'  # noqa
+        template = 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{gencode_version}/GRCh37_mapping/gencode.v{gencode_version}lift37.annotation.gtf.gz'
     elif grch_build == 38:
-        template = 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{gencode_version}/gencode.v{gencode_version}.basic.annotation.gtf.gz'  # noqa
+        template = 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{gencode_version}/gencode.v{gencode_version}.basic.annotation.gtf.gz'
     else:
         raise Exception('cannot handle GRCh build {!r}'.format(grch_build))
     with urllib.request.urlopen(url=template.format(gencode_version=gencode_version)) as f:
@@ -98,9 +98,9 @@ def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_onl
                         continue
                     else:
                         raise Exception('Unknown chromosome {!r} on line {!r}'.format(chrom, line))
-                assert start < end, line
-                ensg = re.search(r'gene_id "(ENSGR?[0-9._A-Z]+?)"', info).group(
-                    1)  # Sometimes we want `ensg.split('.')[0]` but not here.
+                if start >= end:
+                    raise Exception('start >= end for line {!r}'.format(line))
+                ensg = re.search(r'gene_id "(ENSGR?[0-9._A-Z]+?)"', info).group(1)  # Sometimes we want `ensg.split('.')[0]` but not here.
                 symbol = re.search(r'gene_name "(.+?)"', info).group(1)
                 genetype = re.search(r'gene_type "(.+?)"', info).group(1)
                 if coding_only and genetype not in CODINGLIKE_GENETYPES:
@@ -114,19 +114,3 @@ def make_gene_locator(grch_build: str, out_path, *, gencode_version: int = 32, c
     locator = GeneLocator(genes)
     _save_locator(locator, out_path)
     return locator
-
-# def _save_genes_list(grch_build: str, *, gencode_version=32, coding_only=True):
-#     """cache get_genes_iterator() results into a file in this directory for quick use later"""
-#     genes = list(get_genes_iterator(grch_build=grch_build, gencode_version=gencode_version, coding_only=coding_only))
-#     compressed = gzip.compress(json.dumps(genes, separators=(',', ':')).encode('utf8'))
-#     filename = _get_genelist_filename(grch_build, gencode_version=gencode_version, coding_only=coding_only)
-#     with open(filename, 'wb') as f:
-#         f.write(compressed)
-
-
-if __name__ == '__main__':
-    pass
-    # gencode_version = 32
-    # for grch_build in [37, 38]:
-    #     _save_genes_list(grch_build, gencode_version=gencode_version)
-    #     _save_genes_list(grch_build, gencode_version=gencode_version, coding_only=False)

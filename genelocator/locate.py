@@ -95,7 +95,7 @@ class GeneLocator:
 class BisectFinder:
     """
     Given a list like [(123, 'foo'), (125, 'bar')...], BisectFinder helps you find the things before (or at)
-     and after (or at) 124.
+     and after (or at) 124 or any other number.
     """
     def __init__(self, tuples):
         """tuples is like [(123, 'foo'),...]"""
@@ -103,7 +103,6 @@ class BisectFinder:
         self._nums, self._values = list(zip(*tuples))
 
     def get_item_before_or_at(self, pos):
-        """If we get an exact match, let's return it"""
         idx = bisect.bisect_right(self._nums, pos) - 1  # note: bisect_{left,right} just deals with ties.
         if idx < 0:
             return None  # It's fallen off the beginning!

@@ -14,9 +14,6 @@ def get_genelocator(build_or_path: str, *, gencode_version=32, coding_only=True,
         # We are looking up a special, known dataset cached on disk
         geneset = 'codinglike' if coding_only else 'all'  # TODO: Use enum here
         # If auto_fetch is specified, this function will block until the data has been returned
-        # It would be really cool if we could use Peter's streaming dataset generation, but that saving wasn't
-        # implemented. I've simplified the current code t reflect only the features we are currently using, with an eye
-        # towards going that direction later.
         source_path = assets.locate_by_metadata(build_or_path, gencode_version, geneset, auto_fetch=auto_fetch)
     else:
         # The user has specified a path to a lookup file (premade tree in compressed pickle format). Use it!

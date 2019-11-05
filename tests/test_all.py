@@ -29,13 +29,13 @@ class TestGeneLocator:
             build38finder.at('chr99', 1234)
 
     def test_finds_nearest_gene_in_region(self, build38finder):
-        genes = build38finder.at('chr10', 112_950_250)
+        genes = build38finder.at('chr10', 112950250)
         assert genes == [
-            {'ensg': 'ENSG00000148737.17', 'chrom': '10', 'start': 112_950_247, 'end': 113_167_678, 'symbol': 'TCF7L2'}
+            {'ensg': 'ENSG00000148737.17', 'chrom': '10', 'start': 112950247, 'end': 113167678, 'symbol': 'TCF7L2'}
         ]
 
     def test_finds_multiple_genes_in_region(self, build38finder):
-        genes = build38finder.at('10', 113_588_900)
+        genes = build38finder.at('10', 113588900)
         assert len(genes) == 2, 'This position overlaps two genes'
         assert genes == [{'chrom': '10',
                           'end': 113664127,

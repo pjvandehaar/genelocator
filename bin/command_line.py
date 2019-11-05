@@ -32,7 +32,7 @@ def _validate_gencode(value) -> int:
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="This command prints information about the closest gene (or genes, if multiple overlap the location).")  # noqa
+        description="This command prints information about the closest gene (or genes, if multiple overlap the location).")
     parser.add_argument("build",
                         choices=BUILD_LOOKUP.keys(),
                         help="The genome build (must be specified)")
@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument("--version", default=32, type=_validate_gencode,
                         help="The GENCODE database version to use")
     parser.add_argument("--coding-only", dest="coding_only", action='store_true',
-                        help='If specified, restrict search to "coding-like" genes (which means protein_coding_gene + IG_*_gene + TR_*_gene)')  # noqa
+                        help='If specified, restrict search to "coding-like" genes (which means protein_coding_gene + IG_*_gene + TR_*_gene)')
     parser.add_argument('--auto-fetch', dest='auto_fetch', action='store_true',
                         help="If specified, will automatically try to download the required data")
     return parser.parse_args()
