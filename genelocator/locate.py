@@ -65,7 +65,7 @@ class GeneLocator:
         # If any genes overlap this position, return them all.
         overlapping_genes = self._its[chrom].at(pos)
         if overlapping_genes:
-            return [self._serialize(g.data) for g in overlapping_genes]
+            return sorted((self._serialize(g.data) for g in overlapping_genes), key=(lambda g: g['start']))
 
         # If only one direction has genes (either before or after this position), return the gene in that direction.
         prev_gene_end = self._gene_ends[chrom].get_item_before_or_at(pos)

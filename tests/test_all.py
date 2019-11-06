@@ -38,15 +38,15 @@ class TestGeneLocator:
         genes = build38finder.at('10', 113588900)
         assert len(genes) == 2, 'This position overlaps two genes'
         assert genes == [{'chrom': '10',
-                          'end': 113664127,
-                          'ensg': 'ENSG00000197893.13',
-                          'start': 113588716,
-                          'symbol': 'NRAP'},
-                         {'chrom': '10',
                           'end': 113589602,
                           'ensg': 'ENSG00000148702.15',
                           'start': 113550837,
-                          'symbol': 'HABP2'}], 'Found two genes, and the nearest one was listed first'
+                          'symbol': 'HABP2'},
+                         {'chrom': '10',
+                          'end': 113664127,
+                          'ensg': 'ENSG00000197893.13',
+                          'start': 113588716,
+                          'symbol': 'NRAP'}], 'Found two genes, ordered by start position'
 
 
 class TestBisectFinder:
