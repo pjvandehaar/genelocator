@@ -6,11 +6,12 @@
 
 from setuptools import setup
 from pathlib import Path
-import imp
-import os
 import sys
 
-version = imp.load_source('genelocator.__version__', os.path.join('genelocator', '__version__.py')).version
+d = {}
+version_filepath = Path(__file__).absolute().with_name('genelocator') / '__version__.py'
+exec(version_filepath.read_text(), d)
+version = d['version']
 
 if sys.argv[-1] in ['publish', 'pub']:
     import json
