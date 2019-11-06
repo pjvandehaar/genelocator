@@ -6,7 +6,7 @@ from genelocator import exception as gene_exc
 from genelocator.locate import BisectFinder
 
 
-@pytest.fixture('module')
+@pytest.fixture(scope='module')
 def build38finder():
     # Mostly, tests are slow because of the time to build this tree. It's immutable, so only do this 1x per run
     return get_genelocator('GRCh38', gencode_version=32, coding_only=True)
