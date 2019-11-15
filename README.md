@@ -1,8 +1,9 @@
 ## Gene Locator
-This library allows the user to annotate a list of genetic variants given chromosome/position as coordinates.
+This library allows the user to find which genes overlap a genomic location, given a chromosome and position.
+If no genes overlap the given position, then the closest gene is returned instead.
 
 ### Usage
-This library can be used via command line script, or called from within Python. Currently only Python versions >=3.5
+This library can be used via command line script, or called from within Python. Only Python versions >=3.5
 are supported.
 
 ```sh
@@ -26,10 +27,8 @@ The python package comes bundled with data from GENCODE version 32, for builds G
 ### Rules
 It works as follows:
 
-1. If a SNP falls within at least one gene, return a list of gene information for each gene
-    1a. If a SNP falls within multiple genes, return a list of information about all overlapping genes.
-2. If a SNP does not fall within any genes, return information for the gene whose start or end is closest
-   to the specified coordinates.
+1. If the genomic location (chromosome and position) falls within at least one gene, return information about each overlapped gene.
+2. If the location does not fall within any genes, return information for the gene whose start (TSS) or end (TES) is closest.
 3. If the requested chromosome has no data, throw an error.
 
 
