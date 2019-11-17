@@ -2,6 +2,8 @@
 
 
 class BaseGeneLocatorException(Exception):
+    DEFAULT_MESSAGE = ''
+
     def __init__(self, message=None, *args):
         super().__init__(*args)
         self.message = message or self.DEFAULT_MESSAGE

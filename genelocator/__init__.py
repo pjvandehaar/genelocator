@@ -9,7 +9,7 @@ from .const import BUILD_LOOKUP
 from . import exception as gene_exc  # noqa: F401
 
 
-def get_genelocator(build_or_path: str, *, gencode_version=32, coding_only=True, auto_fetch=False):
+def get_genelocator(build_or_path: str, *, gencode_version: int = 32, coding_only=True, auto_fetch=False) -> GeneLocator:
     if build_or_path in BUILD_LOOKUP:
         # We are looking up a special, known dataset cached on disk
         geneset = 'codinglike' if coding_only else 'all'  # TODO: Use enum here

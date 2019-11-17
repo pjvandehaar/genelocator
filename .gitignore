@@ -4,3 +4,4 @@ GeneLocator.egg-info
 build
 dist
 .eggs
+.mypy_cache/

@@ -31,14 +31,14 @@ CODINGLIKE_GENETYPES = {
 }
 
 
-def _download_gencode_gtf_gz_bytes(grch_build, gencode_version):
+def _download_gencode_gtf_gz_bytes(grch_build_number: int, gencode_version: int) -> bytes:
     """Download the file, hold it in memory, and return it as bytes"""
-    if grch_build == 37:
+    if grch_build_number == 37:
         template = 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{gencode_version}/GRCh37_mapping/gencode.v{gencode_version}lift37.annotation.gtf.gz'
-    elif grch_build == 38:
+    elif grch_build_number == 38:
         template = 'ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{gencode_version}/gencode.v{gencode_version}.basic.annotation.gtf.gz'
     else:
-        raise Exception('cannot handle GRCh build {!r}'.format(grch_build))
+        raise Exception('cannot handle GRCh build {!r}'.format(grch_build_number))
     with urllib.request.urlopen(url=template.format(gencode_version=gencode_version)) as f:
         x = f.read()
         content_length = int(f.headers.get('Content-length'))
@@ -48,12 +48,12 @@ def _download_gencode_gtf_gz_bytes(grch_build, gencode_version):
         return x
 
 
-def _get_genelist_filename(grch_build: str, *, gencode_version: int = 32, coding_only: bool = True):
-    return 'gencode-{}-gencode{}-{}.json.gz'.format(grch_build, gencode_version,
+def _get_genelist_filename(grch_build_number: int, *, gencode_version: int = 32, coding_only: bool = True) -> str:
+    return 'gencode-{}-gencode{}-{}.json.gz'.format(grch_build_number, gencode_version,
                                                     'codinglike' if coding_only else 'all')
 
 
-def _save_locator(locator: GeneLocator, out_path: str):
+def _save_locator(locator: GeneLocator, out_path):
     """
     Once the interval tree has been created, it is convenient to save it for future use.
     """
@@ -62,7 +62,7 @@ def _save_locator(locator: GeneLocator, out_path: str):
         pickle.dump(locator, f, protocol=4)
 
 
-def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_only: bool = True) -> ty.Iterator:
+def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_only: bool = True) -> ty.Iterator[dict]:
     """
     Get a list of genes (represented by dicts). The CODINGLIKE_GENETYPES in this module were chosen manually.
     This creates an intermediate datafile that is then used to build the interval tree, so usually this function is
@@ -70,19 +70,19 @@ def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_onl
         (not during day-to-day analysis)
     """
     try:
-        grch_build = const.BUILD_LOOKUP[grch_build]
+        grch_build_number = const.BUILD_LOOKUP[grch_build]
     except KeyError:
         raise gene_exc.AssetFetchError('Cannot retrieve assets for build {}'.format(grch_build))
 
     filepath = os.path.join(os.path.dirname(__file__),
                             'data',
-                            _get_genelist_filename(grch_build, gencode_version=gencode_version,
+                            _get_genelist_filename(grch_build_number, gencode_version=gencode_version,
                                                    coding_only=coding_only))
     if os.path.exists(filepath):
         with gzip.open(filepath, 'rt') as f:
             yield from json.load(f)
     else:
-        compressed = _download_gencode_gtf_gz_bytes(grch_build, gencode_version)
+        compressed = _download_gencode_gtf_gz_bytes(grch_build_number, gencode_version)
         with gzip.open(io.BytesIO(compressed), 'rt') as f:  # avoid holding the full text uncompressed in RAM at once
             for line in f:
                 if line.startswith('#'):
@@ -100,15 +100,22 @@ def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_onl
                         raise Exception('Unknown chromosome {!r} on line {!r}'.format(chrom, line))
                 if start >= end:
                     raise Exception('start >= end for line {!r}'.format(line))
-                ensg = re.search(r'gene_id "(ENSGR?[0-9._A-Z]+?)"', info).group(1)  # Sometimes we want `ensg.split('.')[0]` but not here.
-                symbol = re.search(r'gene_name "(.+?)"', info).group(1)
-                genetype = re.search(r'gene_type "(.+?)"', info).group(1)
+                ensg = _extract_first_group(r'gene_id "(ENSGR?[0-9._A-Z]+?)"', info)  # Sometimes we want `ensg.split('.')[0]` but not here.
+                symbol = _extract_first_group(r'gene_name "(.+?)"', info)
+                genetype = _extract_first_group(r'gene_type "(.+?)"', info)
                 if coding_only and genetype not in CODINGLIKE_GENETYPES:
                     continue
                 yield {'chrom': chrom, 'start': start, 'end': end, 'ensg': ensg, 'symbol': symbol}
 
 
-def make_gene_locator(grch_build: str, out_path, *, gencode_version: int = 32, coding_only: bool = True):
+def _extract_first_group(pattern: str, string: str) -> str:
+    match = re.search(pattern, string)
+    if match is None:
+        raise Exception("re.search({!r}, {!r}) didn't match!")
+    return match.group(1)
+
+
+def make_gene_locator(grch_build: str, out_path, *, gencode_version: int = 32, coding_only: bool = True) -> GeneLocator:
     # TODO: We should save this genes list for performance reasons if possible
     genes = get_genes_iterator(grch_build, gencode_version=gencode_version, coding_only=coding_only)
     locator = GeneLocator(genes)

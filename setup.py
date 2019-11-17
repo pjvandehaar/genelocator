@@ -4,7 +4,7 @@
 # to upload to pypi: `./setup.py publish`
 # to update dependencies: `pip3 install kpa && kpa pip-find-updates`, edit, `pip3 install -U --upgrade-strategy=eager genelocator`, test
 
-from setuptools import setup, Command
+from setuptools import setup, Command  # type: ignore
 from pathlib import Path
 import sys
 
