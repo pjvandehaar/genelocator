@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # to install: `pip install -e .`
 # to install latest from pypi: `pip3 install -U --upgrade-strategy=eager --no-cache-dir genelocator`
-# to upload to pypi: `./setup.py publish`
+# to upload to pypi: `./setup.py publish` (with optional `--initialize` for first run)
 # to update dependencies: `pip3 install kpa && kpa pip-find-updates`, edit, `pip3 install -U --upgrade-strategy=eager genelocator`, test
 
 from setuptools import setup, Command  # type: ignore
@@ -17,7 +17,6 @@ def get_version():
 
 
 class PublishCommand(Command):
-    # TODO: add option --init to skip querying pypi for a previous version
     description = 'Build and publish the package'
     user_options = [('initialize=', None, 'Ignore checking pypi version because package is new')]
 
