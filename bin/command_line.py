@@ -2,7 +2,7 @@
 A command-line script that identifies nearest gene based on genomic coordinates
 
 Sample usages:
-    gene-locator GRCh37 chr19 234523 --coding-only --version gencode32
+    gene-locator GRCh37 chr19 234523 --common-genetypes --version gencode32
     gene-locator hg38 18 234523 --version gencode31
 """
 
@@ -41,8 +41,8 @@ def parse_args():
                         help="The variant position (coordinates should refer to the selected genome build")
     parser.add_argument("--version", default=32, type=_validate_gencode,
                         help="The GENCODE database version to use")
-    parser.add_argument("--coding-only", dest="coding_only", action='store_true',
-                        help='If specified, restrict search to "coding-like" genes (which means protein_coding_gene + IG_*_gene + TR_*_gene)')
+    parser.add_argument("--common-genetypes", dest="common_genetypes_only", action='store_true',
+                        help='If specified, restrict search to "common" genetypes (which means protein_coding + IG_*_gene + TR_*_gene + lincRNA + Mt_[rt]RNA + antisense)')
     parser.add_argument('--auto-fetch', dest='auto_fetch', action='store_true',
                         help="If specified, will automatically try to download the required data")
     return parser.parse_args()
@@ -56,7 +56,7 @@ def main():
     try:
         genelocator = get_genelocator(args.build,
                                       gencode_version=gencode_version,
-                                      coding_only=args.coding_only,
+                                      common_genetypes_only=args.common_genetypes_only,
                                       auto_fetch=args.auto_fetch)
     except gene_exc.UnsupportedDatasetException:
         logger.error('No source found for the requested dataset; exiting')

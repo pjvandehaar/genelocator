@@ -17,8 +17,10 @@ from . import exception as gene_exc
 from .locate import GeneLocator
 
 
-# These "coding-like" genetypes are usually the most useful
-CODINGLIKE_GENETYPES = {
+# These "common" genetypes are usually the most useful
+# To see all genetypes, run `Counter(g['genetype'] for g in _get_unfiltered_genes_iterator(38)).most_common()`
+# These genetypes are copied from <https://github.com/hyunminkang/cramore/blob/6d85ed9/cmd_plp_make_dge_matrix.cpp#L137>.
+COMMON_GENETYPES = {
     'protein_coding',
     'IG_C_gene',
     'IG_D_gene',
@@ -28,6 +30,10 @@ CODINGLIKE_GENETYPES = {
     'TR_D_gene',
     'TR_J_gene',
     'TR_V_gene'
+    'lincRNA',
+    'Mt_tRNA',
+    'Mt_rRNA',
+    'antisense',
 }
 
 
@@ -48,9 +54,9 @@ def _download_gencode_gtf_gz_bytes(grch_build_number: int, gencode_version: int)
         return x
 
 
-def _get_genelist_filename(grch_build_number: int, *, gencode_version: int = 32, coding_only: bool = True) -> str:
+def _get_genelist_filename(grch_build_number: int, *, gencode_version: int = 32, common_genetypes_only: bool = True) -> str:
     return 'gencode-{}-gencode{}-{}.json.gz'.format(grch_build_number, gencode_version,
-                                                    'codinglike' if coding_only else 'all')
+                                                    'common_genetypes_only' if common_genetypes_only else 'all')
 
 
 def _save_locator(locator: GeneLocator, out_path):
@@ -81,7 +87,7 @@ def _get_unfiltered_genes_iterator(grch_build_number: int, *, gencode_version: i
             yield {'chrom': chrom, 'start': start, 'end': end, 'ensg': ensg, 'symbol': symbol, 'genetype': genetype, 'line': line}
 
 
-def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_only: bool = True) -> ty.Iterator[dict]:
+def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, common_genetypes_only: bool = True) -> ty.Iterator[dict]:
     """
     Get a list of genes (represented by dicts). The CODINGLIKE_GENETYPES in this module were chosen manually.
     This creates an intermediate datafile that is then used to build the interval tree, so usually this function is
@@ -96,7 +102,7 @@ def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_onl
     filepath = os.path.join(os.path.dirname(__file__),
                             'data',
                             _get_genelist_filename(grch_build_number, gencode_version=gencode_version,
-                                                   coding_only=coding_only))
+                                                   common_genetypes_only=common_genetypes_only))
     if os.path.exists(filepath):
         with gzip.open(filepath, 'rt') as f:
             yield from json.load(f)
@@ -108,7 +114,7 @@ def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_onl
                     continue
                 else:
                     raise Exception('Unknown chromosome {!r} on line {!r}'.format(gene['chrom'], gene['line']))
-            if coding_only and gene['genetype'] not in CODINGLIKE_GENETYPES:
+            if common_genetypes_only and gene['genetype'] not in COMMON_GENETYPES:
                 continue
             gene.pop('genetype')
             gene.pop('line')
@@ -122,9 +128,9 @@ def _extract_first_group(pattern: str, string: str) -> str:
     return match.group(1)
 
 
-def make_gene_locator(grch_build: str, out_path, *, gencode_version: int = 32, coding_only: bool = True) -> GeneLocator:
+def make_gene_locator(grch_build: str, out_path, *, gencode_version: int = 32, common_genetypes_only: bool = True) -> GeneLocator:
     # TODO: We should save this genes list for performance reasons if possible
-    genes = get_genes_iterator(grch_build, gencode_version=gencode_version, coding_only=coding_only)
+    genes = get_genes_iterator(grch_build, gencode_version=gencode_version, common_genetypes_only=common_genetypes_only)
     locator = GeneLocator(genes)
     _save_locator(locator, out_path)
     return locator

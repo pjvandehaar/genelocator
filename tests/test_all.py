@@ -9,13 +9,13 @@ from genelocator.locate import BisectFinder
 @pytest.fixture(scope='module')
 def build38finder():
     # Mostly, tests are slow because of the time to build this tree. It's immutable, so only do this 1x per run
-    return get_genelocator('GRCh38', gencode_version=32, coding_only=True)
+    return get_genelocator('GRCh38', gencode_version=32, common_genetypes_only=True)
 
 
 class TestGeneLocator:
     def test_creates_locator_from_filepath(self):
         """This should work (measured by not raising an exception)"""
-        filepath = assets._get_cache_filepath('GRCh37', 32, 'codinglike')
+        filepath = assets._get_cache_filepath('GRCh37', 32, 'common_genetypes')
         get_genelocator(filepath)
 
     def test_finds_nearest_gene_when_none_overlap(self, build38finder):

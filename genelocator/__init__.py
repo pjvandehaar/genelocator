@@ -9,10 +9,10 @@ from .const import BUILD_LOOKUP
 from . import exception as gene_exc  # noqa: F401
 
 
-def get_genelocator(build_or_path: str, *, gencode_version: int = 32, coding_only=True, auto_fetch=False) -> GeneLocator:
+def get_genelocator(build_or_path: str, *, gencode_version: int = 32, common_genetypes_only=True, auto_fetch=False) -> GeneLocator:
     if build_or_path in BUILD_LOOKUP:
         # We are looking up a special, known dataset cached on disk
-        geneset = 'codinglike' if coding_only else 'all'  # TODO: Use enum here
+        geneset = 'common_genetypes' if common_genetypes_only else 'all'  # TODO: Use enum here
         # If auto_fetch is specified, this function will block until the data has been returned
         source_path = assets.locate_by_metadata(build_or_path, gencode_version, geneset, auto_fetch=auto_fetch)
     else:

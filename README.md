@@ -8,7 +8,7 @@ are supported.
 
 ```sh
 $ pip3 install genelocator
-$ gene-locator GRCh37 chr19 234523 --coding-only --version gencode32
+$ gene-locator GRCh37 chr19 234523 --common-genetypes --version gencode32
 # => 19	281040	291403	ENSG00000141934.10_5	PLPP2
 ```
 
@@ -16,7 +16,7 @@ $ gene-locator GRCh37 chr19 234523 --coding-only --version gencode32
 from genelocator import get_genelocator
 # By default, it will only perform the lookup if cached data is available.
 #  A new lookup can be automatically generated for a different build/ gene list, by specifying auto_fetch=True
-gl = get_genelocator('GRCh38', gencode_version=31, coding_only=True, auto_fetch=True)
+gl = get_genelocator('GRCh38', gencode_version=31, common_genetypes_only=True, auto_fetch=True)
 gene = gl.at('chr19', 101000)
 # => [{'chrom': '19', 'start': 107104, 'end': 117102, 'ensg': 'ENSG00000176695.8', 'symbol': 'OR4F17'}]
 ```

@@ -27,9 +27,9 @@ def _get_generated_filepath(build: str, version: int, geneset: str) -> str:
     Generate a dataset (if possible). Returns the filename of the generated asset, or raises an AssetFetchError
     """
     out_path = _get_cache_filepath(build, version, geneset)
-    coding_only = (geneset == 'codinglike')
+    common_genetypes_only = (geneset == 'common_genesets')
     download.make_gene_locator(build, out_path,
-                               gencode_version=version, coding_only=coding_only)
+                               gencode_version=version, common_genetypes_only=common_genetypes_only)
     return out_path
 
 
