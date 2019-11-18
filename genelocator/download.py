@@ -62,6 +62,25 @@ def _save_locator(locator: GeneLocator, out_path):
         pickle.dump(locator, f, protocol=4)
 
 
+def _get_unfiltered_genes_iterator(grch_build_number: int, *, gencode_version: int = 32) -> ty.Iterator[dict]:
+    compressed = _download_gencode_gtf_gz_bytes(grch_build_number, gencode_version)
+    with gzip.open(io.BytesIO(compressed), 'rt') as f:  # avoid holding the full text uncompressed in RAM at once
+        for line in f:
+            if line.startswith('#'):
+                continue
+            chrom, source, feature_type, start, end, _, strand, CDS_phase, info = line.split('\t')
+            if feature_type != 'gene':
+                continue
+            start = int(start)
+            end = int(end)
+            if start >= end:
+                raise Exception('start >= end for line {!r}'.format(line))
+            ensg = _extract_first_group(r'gene_id "(ENSGR?[0-9._A-Z]+?)"', info)  # Sometimes we want `ensg.split('.')[0]` but not here.
+            symbol = _extract_first_group(r'gene_name "(.+?)"', info)
+            genetype = _extract_first_group(r'gene_type "(.+?)"', info)
+            yield {'chrom': chrom, 'start': start, 'end': end, 'ensg': ensg, 'symbol': symbol, 'genetype': genetype, 'line': line}
+
+
 def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_only: bool = True) -> ty.Iterator[dict]:
     """
     Get a list of genes (represented by dicts). The CODINGLIKE_GENETYPES in this module were chosen manually.
@@ -82,30 +101,18 @@ def get_genes_iterator(grch_build: str, *, gencode_version: int = 32, coding_onl
         with gzip.open(filepath, 'rt') as f:
             yield from json.load(f)
     else:
-        compressed = _download_gencode_gtf_gz_bytes(grch_build_number, gencode_version)
-        with gzip.open(io.BytesIO(compressed), 'rt') as f:  # avoid holding the full text uncompressed in RAM at once
-            for line in f:
-                if line.startswith('#'):
+        for gene in _get_unfiltered_genes_iterator(grch_build_number, gencode_version=gencode_version):
+            if not gene['chrom'].startswith('chr'):
+                if gene['chrom'].startswith('GL'):
+                    # We don't know what to do with this type of entry, even though it's a valid identifier
                     continue
-                chrom, source, feature_type, start, end, _, strand, CDS_phase, info = line.split('\t')
-                if feature_type != 'gene':
-                    continue
-                start = int(start)
-                end = int(end)
-                if not chrom.startswith('chr'):
-                    if chrom.startswith('GL'):
-                        # We don't know what to do with this type of entry, even though it's a valid identifier
-                        continue
-                    else:
-                        raise Exception('Unknown chromosome {!r} on line {!r}'.format(chrom, line))
-                if start >= end:
-                    raise Exception('start >= end for line {!r}'.format(line))
-                ensg = _extract_first_group(r'gene_id "(ENSGR?[0-9._A-Z]+?)"', info)  # Sometimes we want `ensg.split('.')[0]` but not here.
-                symbol = _extract_first_group(r'gene_name "(.+?)"', info)
-                genetype = _extract_first_group(r'gene_type "(.+?)"', info)
-                if coding_only and genetype not in CODINGLIKE_GENETYPES:
-                    continue
-                yield {'chrom': chrom, 'start': start, 'end': end, 'ensg': ensg, 'symbol': symbol}
+                else:
+                    raise Exception('Unknown chromosome {!r} on line {!r}'.format(gene['chrom'], gene['line']))
+            if coding_only and gene['genetype'] not in CODINGLIKE_GENETYPES:
+                continue
+            gene.pop('genetype')
+            gene.pop('line')
+            yield gene
 
 
 def _extract_first_group(pattern: str, string: str) -> str:
