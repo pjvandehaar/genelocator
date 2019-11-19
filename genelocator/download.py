@@ -30,10 +30,10 @@ COMMON_GENETYPES = {
     'TR_D_gene',
     'TR_J_gene',
     'TR_V_gene'
-    'lincRNA',
-    'Mt_tRNA',
-    'Mt_rRNA',
-    'antisense',
+    # 'lincRNA',  # consider adding these biotypes later
+    # 'Mt_tRNA',
+    # 'Mt_rRNA',
+    # 'antisense',
 }
 
 

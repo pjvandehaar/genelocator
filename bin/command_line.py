@@ -42,7 +42,7 @@ def parse_args():
     parser.add_argument("--version", default=32, type=_validate_gencode,
                         help="The GENCODE database version to use")
     parser.add_argument("--common-genetypes", dest="common_genetypes_only", action='store_true',
-                        help='If specified, restrict search to "common" genetypes (which means protein_coding + IG_*_gene + TR_*_gene + lincRNA + Mt_[rt]RNA + antisense)')
+                        help='If specified, restrict search to "common" genetypes (which means protein_coding + IG_*_gene + TR_*_gene)')
     parser.add_argument('--auto-fetch', dest='auto_fetch', action='store_true',
                         help="If specified, will automatically try to download the required data")
     return parser.parse_args()
