@@ -39,4 +39,6 @@ To install dependencies and run in development mode:
 
 Linting rules: `flake8`
 
+Type checking: `mypy --ignore-missing-imports . && pytype genelocator && pyre --source-directory=genelocator check`
+
 Unit tests: `pytest tests/`
