@@ -22,6 +22,7 @@ jobs:
         bash -c 'find ~/.cache/pip -type f || true'
     - name: Lint with flake8
       run: |
+        python3 -m pip install wheel
         python3 -m pip install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --show-source --statistics
