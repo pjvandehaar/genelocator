@@ -21,7 +21,7 @@ jobs:
           ${{ runner.os }}-pip-
     - name: List pip cache before pip install
       run: |
-        find ~/.cache/pip -type f
+        bash -c 'find ~/.cache/pip -type f || true'
     - name: Lint with flake8
       run: |
         python3 -m pip install flake8
