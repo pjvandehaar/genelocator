@@ -79,7 +79,7 @@ class PublishCommand(Command):
                     self.die("Name of file inside dist/ doesn't begin with GeneLocator-, indicating that we might be in the wrong directory")
                 self.print_bold('=> unlinking {}'.format(child))
                 child.unlink()
-        subprocess.run('python3 setup.py sdist bdist_wheel --universal'.split(), check=True)
+        subprocess.run('python3 setup.py sdist bdist_wheel'.split(), check=True)
         if not Path('~/.pypirc').expanduser().exists():
             self.print_bold('=> warning: you need a ~/.pypirc')
         try:

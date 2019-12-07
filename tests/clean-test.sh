@@ -9,7 +9,7 @@ echo "=> Making wheel"
 if [[ -d GeneLocator.egg-info ]]; then rm -r GeneLocator.egg-info; fi
 if [[ -d build/lib/genelocator ]]; then rm -r build; fi
 if [[ -d dist/GeneLocator* ]]; then rm -r dist; fi
-python3 setup.py sdist bdist_wheel --universal
+python3 setup.py sdist bdist_wheel
 
 cd /tmp
 rm -rf ./clean-test-venv
